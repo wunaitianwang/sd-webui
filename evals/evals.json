@@ -1,0 +1,47 @@
+{
+  "skill_name": "sd-webui",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "anime-txt2img",
+      "prompt": "帮我用本地的 Stable Diffusion 画一张图：赛博朋克风格的动漫少女，紫色短发，机械义肢，霓虹灯夜景背景，竖版构图。画完把图片保存到 {OUTDIR} 目录，并告诉我你用的完整英文提示词和种子。",
+      "expected_output": "在指定目录生成一张竖版动漫图片（按当前加载模型选择正确分辨率），返回英文 danbooru 风格提示词和 seed",
+      "files": [],
+      "assertions": [
+        "outputs 目录中存在至少一张有效 PNG 图片",
+        "图片为竖版构图（高 > 宽）",
+        "分辨率匹配当前模型架构（SDXL≥832×1216 或 SD1.5 512×768 级别）",
+        "回答给出英文 danbooru 风格提示词且含紫发/机械/赛博朋克要素",
+        "回答给出具体 seed 数值",
+        "任务结束后 WebUI API 仍在线（没把服务器搞挂）"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "upscale-and-params",
+      "prompt": "这张图 C:\\Users\\z2269\\.claude\\skills\\sd-webui-workspace\\test-inputs\\sdxl-sample.png 是我之前用本地 SD WebUI 生成的。帮我做两件事：1) 读出它当时的生成参数（提示词、采样器、种子等）；2) 用适合动漫图的放大算法把它放大 2 倍，结果存到 {OUTDIR}。",
+      "expected_output": "正确读出 PNG 内嵌参数（prompt/sampler/seed/model），用 R-ESRGAN 4x+ Anime6B 或 4x-AnimeSharp 放大保存",
+      "files": ["C:\\Users\\z2269\\.claude\\skills\\sd-webui-workspace\\test-inputs\\sdxl-sample.png"],
+      "assertions": [
+        "正确读出原图参数：silver hair 提示词 / DPM++ 2M / seed 3337113944... 实际对照 png-info",
+        "存在放大后 PNG 且尺寸为原图 2 倍 (1664×2432)",
+        "使用动漫专用放大算法（R-ESRGAN 4x+ Anime6B 或 4x-AnimeSharp）",
+        "通过 SD extras API 放大而非 PIL 插值"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "env-query",
+      "prompt": "我本地的 SD WebUI 现在是什么状态？装了哪些大模型 checkpoint、哪些采样器可用、当前加载的是哪个模型、显存还剩多少？整理成清单给我。把整理结果写到 {OUTDIR}\\report.md。",
+      "expected_output": "列出 2 个 checkpoint、20 个采样器、当前模型、显存信息，写入 report.md",
+      "files": [],
+      "assertions": [
+        "report.md 存在且非空",
+        "列出两个 checkpoint：illustriousXLV20_v20Stable 与 anything-v5",
+        "列出至少 15 个采样器且含 DPM++ 2M / Euler a",
+        "当前加载模型与实际一致",
+        "给出显存总量 8GB 及剩余/已用数值"
+      ]
+    }
+  ]
+}
